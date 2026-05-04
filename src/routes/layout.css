@@ -1,3 +1,180 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* ── Font imports ── */
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-grotesk/700.css';
+@import '@fontsource-variable/plus-jakarta-sans';
+@import '@fontsource/manrope/400.css';
+@import '@fontsource/manrope/500.css';
+@import '@fontsource/manrope/600.css';
+@import '@fontsource/manrope/700.css';
+
+/* ══════════════════════════════════════════
+   ARENA.OPS – Design System Tokens
+   ══════════════════════════════════════════ */
+
+@theme {
+  /* ── Color Palette ── */
+  --color-surface: #0F2A35;
+  --color-surface-light: #163542;
+  --color-surface-lighter: #1D4050;
+  --color-surface-border: rgba(0, 255, 255, 0.12);
+
+  --color-primary: #00FFFF;
+  --color-primary-dim: rgba(0, 255, 255, 0.6);
+  --color-primary-muted: rgba(0, 255, 255, 0.15);
+  --color-primary-ghost: rgba(0, 255, 255, 0.08);
+
+  --color-secondary: #FF3D00;
+  --color-secondary-dim: rgba(255, 61, 0, 0.6);
+  --color-secondary-muted: rgba(255, 61, 0, 0.15);
+
+  --color-tertiary: #FFD600;
+  --color-tertiary-dim: rgba(255, 214, 0, 0.6);
+  --color-tertiary-muted: rgba(255, 214, 0, 0.15);
+
+  --color-win: #00FF88;
+  --color-loss: #FF3D00;
+  --color-draw: #FFD600;
+
+  /* ── Typography ── */
+  --font-headline: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-label: 'Manrope', system-ui, sans-serif;
+
+  /* ── Spacing / Radius ── */
+  --radius-panel: 16px;
+  --radius-card: 12px;
+  --radius-button: 8px;
+
+  /* ── Glassmorphism ── */
+  --glass-bg: rgba(15, 42, 53, 0.65);
+  --glass-bg-heavy: rgba(15, 42, 53, 0.85);
+  --glass-border: rgba(0, 255, 255, 0.10);
+  --glass-blur: 16px;
+  --glass-blur-heavy: 24px;
+
+  /* ── Shadows ── */
+  --shadow-glow-primary: 0 0 20px rgba(0, 255, 255, 0.15);
+  --shadow-glow-secondary: 0 0 20px rgba(255, 61, 0, 0.15);
+  --shadow-glow-tertiary: 0 0 20px rgba(255, 214, 0, 0.15);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ══════════════════════════════════════════
+   Global Styles
+   ══════════════════════════════════════════ */
+
+html {
+  background-color: var(--color-surface);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  color: rgba(255, 255, 255, 0.9);
+  background-color: var(--color-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ══════════════════════════════════════════
+   Glassmorphism Utility Classes
+   ══════════════════════════════════════════ */
+
+@utility glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+@utility glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+}
+
+@utility glass-heavy {
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(var(--glass-blur-heavy));
+  -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+/* ══════════════════════════════════════════
+   Typography Utility Classes
+   ══════════════════════════════════════════ */
+
+@utility font-headline {
+  font-family: var(--font-headline);
+}
+
+@utility font-body {
+  font-family: var(--font-body);
+}
+
+@utility font-label {
+  font-family: var(--font-label);
+}
+
+/* ══════════════════════════════════════════
+   Glow Utility Classes
+   ══════════════════════════════════════════ */
+
+@utility glow-primary {
+  box-shadow: var(--shadow-glow-primary);
+}
+
+@utility glow-secondary {
+  box-shadow: var(--shadow-glow-secondary);
+}
+
+@utility glow-tertiary {
+  box-shadow: var(--shadow-glow-tertiary);
+}
+
+@utility text-glow-primary {
+  text-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+}
+
+@utility text-glow-secondary {
+  text-shadow: 0 0 12px rgba(255, 61, 0, 0.5);
+}
+
+/* ══════════════════════════════════════════
+   Selection & Scrollbar
+   ══════════════════════════════════════════ */
+
+::selection {
+  background: rgba(0, 255, 255, 0.25);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.35);
+}
