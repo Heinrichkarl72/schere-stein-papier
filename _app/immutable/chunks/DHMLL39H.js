@@ -1,0 +1,1 @@
+var e=[`rock`,`paper`,`scissors`],t={rock:`🪨`,paper:`📄`,scissors:`✂️`},n={rock:`ROCK`,paper:`PAPER`,scissors:`SCISSORS`},r={rock:`scissors`,paper:`rock`,scissors:`paper`};function i(){return e[Math.floor(Math.random()*e.length)]}function a(e,t){return e===t?`draw`:r[e]===t?`win`:`loss`}export{i,n,a as r,t};
