@@ -8,6 +8,9 @@ export type Result = 'win' | 'loss' | 'draw';
 export interface Operative {
 	id: string;
 	callsign: string;
+	avatar_url?: string;
+	title?: string;
+	active_skin?: string;
 	created_at: string;
 }
 

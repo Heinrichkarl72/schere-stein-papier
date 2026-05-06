@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { gameStore } from '$lib/stores/game.svelte';
+	import { operativeStore } from '$lib/stores/operative.svelte';
 	import { MOVE_EMOJI, MOVE_LABEL } from '$lib/engine';
 	import type { Move } from '$lib/types';
 	import { fade, fly } from 'svelte/transition';
@@ -9,6 +10,14 @@
 	async function handleSelect(move: Move) {
 		await gameStore.selectMove(move);
 	}
+
+	const skinClass = $derived.by(() => {
+		const skin = operativeStore.equippedSkin;
+		if (skin === 'Classic Terminal') return 'skin-terminal';
+		if (skin === 'Ghost Protocol') return 'skin-ghost';
+		if (skin === 'Overdrive') return 'skin-overdrive';
+		return 'skin-neon';
+	});
 </script>
 
 <div class="flex-1 flex divide-x divide-white/5 overflow-hidden">
@@ -57,59 +66,83 @@
 
 			<div class="grid grid-cols-3 gap-6 w-full max-w-md">
 				{#each moves as move (move)}
-					<button
-						disabled={gameStore.phase !== 'selecting'}
-						onclick={() => handleSelect(move)}
-						class="flex flex-col items-center gap-4 p-6 glass-card border border-white/5 hover:border-primary/30 transition-all group
-                        {gameStore.playerMove === move ? 'border-primary bg-primary/10' : ''}
-                        {gameStore.phase !== 'selecting' ? 'opacity-50 grayscale' : 'hover:-translate-y-1'}"
-					>
-						<span class="text-4xl group-hover:scale-110 transition-transform">
-							{MOVE_EMOJI[move]}
-						</span>
-						<span class="text-[10px] font-label font-bold tracking-widest text-white/40 group-hover:text-primary transition-colors">
-							{MOVE_LABEL[move]}
-						</span>
-					</button>
-				{/each}
+						<button
+							disabled={gameStore.phase !== 'selecting'}
+							onclick={() => handleSelect(move)}
+							class="flex flex-col items-center gap-4 p-6 glass-card border border-white/5 hover:border-primary/30 transition-all group {skinClass}
+                            {gameStore.playerMove === move ? 'active-move' : ''}
+                            {gameStore.phase !== 'selecting' ? 'opacity-50 grayscale' : 'hover:-translate-y-1'}"
+						>
+							<span class="text-4xl group-hover:scale-110 transition-transform emoji">
+								{MOVE_EMOJI[move]}
+							</span>
+							<span class="text-[10px] font-label font-bold tracking-widest text-white/40 group-hover:text-current transition-colors">
+								{MOVE_LABEL[move]}
+							</span>
+						</button>
+					{/each}
+				</div>
+
+				<!-- Result Display -->
+				<div class="mt-16 h-24 flex items-center justify-center">
+					{#if gameStore.phase === 'revealing'}
+						<div in:fade class="flex items-center gap-4">
+							<div class="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+							<div class="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+							<div class="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+						</div>
+					{:else if gameStore.phase === 'result' && gameStore.result}
+						<div in:fly={{ y: 20 }} class="text-center">
+							<div class="text-sm font-label font-bold tracking-[0.4em] uppercase mb-1
+                                {gameStore.result === 'win' ? 'text-win' : gameStore.result === 'loss' ? 'text-loss' : 'text-draw'}">
+								{gameStore.result === 'draw' ? 'STALEMATE' : gameStore.result === 'win' ? 'VICTORY' : 'DEFEAT'}
+							</div>
+							<div class="text-xs text-white/40">
+								BOT PLAYED {MOVE_LABEL[gameStore.botMove!] || ''}
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 
-			<!-- Result Display -->
-			<div class="mt-16 h-24 flex items-center justify-center">
-				{#if gameStore.phase === 'revealing'}
-					<div in:fade class="flex items-center gap-4">
-						<div class="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-						<div class="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-						<div class="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-					</div>
-				{:else if gameStore.phase === 'result' && gameStore.result}
-					<div in:fly={{ y: 20 }} class="text-center">
-						<div class="text-sm font-label font-bold tracking-[0.4em] uppercase mb-1
-                            {gameStore.result === 'win' ? 'text-win' : gameStore.result === 'loss' ? 'text-loss' : 'text-draw'}">
-							{gameStore.result === 'draw' ? 'STALEMATE' : gameStore.result === 'win' ? 'VICTORY' : 'DEFEAT'}
-						</div>
-						<div class="text-xs text-white/40">
-							BOT PLAYED {MOVE_LABEL[gameStore.botMove!] || ''}
-						</div>
-					</div>
-				{/if}
-			</div>
-		</div>
-
-		<!-- Status Panel -->
-		<div class="mt-auto glass-panel p-8 flex flex-col items-center justify-center border-white/10 bg-white/2">
-			<div class="text-[10px] font-label font-bold text-white/30 tracking-[0.3em] uppercase mb-2">CURRENT STATE</div>
-			<div class="text-4xl font-headline font-bold text-white/10 italic tracking-widest">
-				{#if gameStore.phase === 'idle'}
-					WAITING...
-				{:else if gameStore.phase === 'selecting'}
-					SELECTING...
-				{:else if gameStore.phase === 'revealing'}
-					REVEALING...
-				{:else}
-					ROUND OVER
-				{/if}
+			<!-- Status Panel -->
+			<div class="mt-auto glass-panel p-8 flex flex-col items-center justify-center border-white/10 bg-white/2">
+				<div class="text-[10px] font-label font-bold text-white/30 tracking-[0.3em] uppercase mb-2">CURRENT STATE</div>
+				<div class="text-4xl font-headline font-bold text-white/10 italic tracking-widest">
+					{#if gameStore.phase === 'idle'}
+						WAITING...
+					{:else if gameStore.phase === 'selecting'}
+						SELECTING...
+					{:else if gameStore.phase === 'revealing'}
+						REVEALING...
+					{:else}
+						ROUND OVER
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+
+<style>
+	.skin-neon { --current-color: var(--color-primary); }
+	.skin-terminal { --current-color: #00FF41; } /* Matrix Green */
+	.skin-ghost { --current-color: #FFFFFF; } /* White Glow */
+	.skin-overdrive { --current-color: #FF3D00; }
+
+	.active-move {
+		border-color: var(--current-color) !important;
+		background: color-mix(in srgb, var(--current-color) 10%, transparent) !important;
+	}
+
+	.active-move .emoji {
+		filter: drop-shadow(0 0 10px var(--current-color));
+	}
+
+	.active-move span:last-child {
+		color: var(--current-color) !important;
+	}
+
+	button:hover:not(:disabled) {
+		color: var(--current-color);
+	}
+</style>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { operativeStore } from '$lib/stores/operative.svelte';
 	import { Terminal, ShieldCheck, AlertCircle, Loader2 } from 'lucide-svelte';
+	import { fade } from 'svelte/transition';
 
 	let callsign = $state('');
 	let isSubmitting = $state(false);

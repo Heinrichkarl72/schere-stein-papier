@@ -30,6 +30,7 @@ function createOperativeStore() {
 
 	const isLoggedIn = $derived(operative !== null);
 	const callsign = $derived(operative?.callsign ?? '');
+	const equippedSkin = $derived(operative?.active_skin ?? 'Default Neon');
 	const totalGames = $derived(stats.wins + stats.losses + stats.draws);
 	const winRate = $derived(totalGames > 0 ? Math.round((stats.wins / totalGames) * 100) : 0);
 
@@ -119,6 +120,34 @@ function createOperativeStore() {
 		loadStats();
 	}
 
+	/** Update operative profile data. */
+	async function updateOperative(updates: Partial<Operative>): Promise<boolean> {
+		if (!operative) return false;
+
+		loading = true;
+		error = null;
+
+		try {
+			const { data, error: updateError } = await supabase
+				.from('operatives')
+				.update(updates)
+				.eq('id', operative.id)
+				.select()
+				.single();
+
+			if (updateError) throw updateError;
+
+			operative = data as Operative;
+			saveToStorage(operative);
+			return true;
+		} catch (e: unknown) {
+			error = e instanceof Error ? e.message : 'Failed to update profile.';
+			return false;
+		} finally {
+			loading = false;
+		}
+	}
+
 	return {
 		get operative() {
 			return operative;
@@ -144,9 +173,13 @@ function createOperativeStore() {
 		get winRate() {
 			return winRate;
 		},
+		get equippedSkin() {
+			return equippedSkin;
+		},
 		login,
 		logout,
 		refreshStats,
+		updateOperative,
 		async resetStats(): Promise<void> {
 			if (!operative) return;
 			try {
