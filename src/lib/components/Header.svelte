@@ -9,6 +9,7 @@
 		{ name: 'BATTLE', href: `${base}/` },
 		{ name: 'LEADERBOARD', href: `${base}/leaderboard` },
 		{ name: 'RECRUITS', href: `${base}/recruits` },
+		{ name: 'PREDICTOR', href: `${base}/predictor` },
 		{ name: 'INTEL', href: `${base}/intel` }
 	];
 </script>
