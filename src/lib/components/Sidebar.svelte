@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LayoutGrid, Swords, Shield, Settings, ChevronRight, Target } from 'lucide-svelte';
+	import { LayoutGrid, Swords, Shield, Settings, ChevronRight, Target, Trophy } from 'lucide-svelte';
 	import { operativeStore } from '$lib/stores/operative.svelte';
 	import OperativeAvatar from './OperativeAvatar.svelte';
 
@@ -11,6 +11,7 @@
 		{ id: 'battle-log', label: 'BATTLE LOG', icon: Swords, href: `${base}/intel` },
 		{ id: 'arsenal', label: 'ARSENAL', icon: Shield, href: `${base}/arsenal` },
 		{ id: 'predictor', label: 'PREDICTOR', icon: Target, href: `${base}/predictor` },
+		{ id: 'ballondor', label: 'BALLON D\'OR', icon: Trophy, href: `${base}/ballondor` },
 		{ id: 'leaderboard', label: 'LEADERBOARD', icon: LayoutGrid, href: `${base}/leaderboard` }
 	]);
 
