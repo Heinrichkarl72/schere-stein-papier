@@ -7,7 +7,7 @@
 	import StatsSidebar from '$lib/components/StatsSidebar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import OperativeAuth from '$lib/components/OperativeAuth.svelte';
-	import { Target, Zap, ShieldAlert, Activity, Crosshair, Radio } from 'lucide-svelte';
+	import { Target, Zap, ShieldAlert, Activity, Crosshair, Radio, CheckCircle2, AlertTriangle } from 'lucide-svelte';
 
 	import { getAllTeams } from '$lib/services/footballData';
 	import { calculateProbability, calculateProbabilityFromData } from '$lib/game/predictorEngine';
@@ -95,75 +95,70 @@
 		homeTeamId = '';
 		awayTeamId = '';
 
-		// Run scan animation
-		scanning = true;
+		// Reset states for new selection
+		scanning = false;
 		showResults = false;
 		showTacticalDetails = false;
 		prediction = null;
 		scanProgress = 0;
+		tacticalContext = null;
 
-		// Start background fetch immediately
-		const tacticalPromise = fetch(`/api/tactical-data?matchId=${fixture.id}&homeId=${fixture.homeTeam.id}&awayId=${fixture.awayTeam.id}`)
-			.then(res => res.json());
-
-		const steps = 40;
-		for (let i = 0; i <= steps; i++) {
-			scanProgress = Math.round((i / steps) * 100);
-			await sleep(60);
-		}
-
-		try {
-			const tacticalData = await tacticalPromise;
-			tacticalContext = tacticalData;
-
-			const compStandings = standings.filter((s) => s.competitionCode === fixture.competition.code);
-			const { avgFor, avgAgainst } = calcLeagueAvgGoals(compStandings);
-			const homeData = standingToTeamData(homeSt, avgFor, avgAgainst);
-			const awayData = standingToTeamData(awaySt, avgFor, avgAgainst);
-
-			const context = {
-				homeStarPlayers: leagueStars[fixture.competition.code]?.filter(s => s.teamId === fixture.homeTeam.id) || [],
-				awayStarPlayers: leagueStars[fixture.competition.code]?.filter(s => s.teamId === fixture.awayTeam.id) || [],
-				homeLineup: tacticalData.homeLineup || [],
-				awayLineup: tacticalData.awayLineup || [],
-				homeMomentum: tacticalData.homeMomentum,
-				awayMomentum: tacticalData.awayMomentum,
-				leagueCode: fixture.competition.code
-			};
-
-			prediction = calculateProbabilityFromData(homeData, awayData, context);
-		} catch (err) {
-			console.error('Tactical Scan Failed:', err);
-			// Fallback to basic prediction
-			const compStandings = standings.filter((s) => s.competitionCode === fixture.competition.code);
-			const { avgFor, avgAgainst } = calcLeagueAvgGoals(compStandings);
-			prediction = calculateProbabilityFromData(
-				standingToTeamData(homeSt, avgFor, avgAgainst),
-				standingToTeamData(awaySt, avgFor, avgAgainst)
-			);
-		}
-
-		scanning = false;
-		showResults = true;
+		// Start background fetch immediately (silent)
+		fetch(`/api/tactical-data?matchId=${fixture.id}&homeId=${fixture.homeTeam.id}&awayId=${fixture.awayTeam.id}`)
+			.then(res => res.json())
+			.then(data => {
+				tacticalContext = data;
+			})
+			.catch(err => {
+				console.error('Initial Tactical Fetch Failed:', err);
+			});
 	}
 
 	async function initiateScan() {
-		if (!canAnalyze) return;
+		if (!selectedFixture) return;
 
-		liveMode = false;
-		selectedFixture = null;
 		scanning = true;
 		showResults = false;
 		prediction = null;
 		scanProgress = 0;
 
+		// 1.5s progress simulation (requested)
 		const steps = 30;
 		for (let i = 0; i <= steps; i++) {
 			scanProgress = Math.round((i / steps) * 100);
-			await sleep(80);
+			await sleep(50);
 		}
 
-		prediction = calculateProbability(homeTeamId, awayTeamId);
+		try {
+			// Find standings for both teams
+			const homeSt = standings.find((s) => s.teamId === selectedFixture!.homeTeam.id);
+			const awaySt = standings.find((s) => s.teamId === selectedFixture!.awayTeam.id);
+
+			if (!homeSt || !awaySt) {
+				console.warn('Standings missing for tactical scan — falling back to neutral baseline.');
+				prediction = calculateProbability(homeTeamId, awayTeamId); // Fallback
+			} else {
+				const compStandings = standings.filter((s) => s.competitionCode === selectedFixture!.competition.code);
+				const { avgFor, avgAgainst } = calcLeagueAvgGoals(compStandings);
+				const homeData = standingToTeamData(homeSt, avgFor, avgAgainst);
+				const awayData = standingToTeamData(awaySt, avgFor, avgAgainst);
+
+				const context = {
+					homeStarPlayers: leagueStars[selectedFixture!.competition.code]?.filter(s => s.teamId === selectedFixture!.homeTeam.id) || [],
+					awayStarPlayers: leagueStars[selectedFixture!.competition.code]?.filter(s => s.teamId === selectedFixture!.awayTeam.id) || [],
+					homeLineup: tacticalContext?.homeLineup || [],
+					awayLineup: tacticalContext?.awayLineup || [],
+					homeMomentum: tacticalContext?.homeMomentum,
+					awayMomentum: tacticalContext?.awayMomentum,
+					leagueCode: selectedFixture!.competition.code
+				};
+
+				prediction = calculateProbabilityFromData(homeData, awayData, context);
+			}
+		} catch (err) {
+			console.error('Tactical Calculation Failed:', err);
+		}
+
 		scanning = false;
 		showResults = true;
 	}
@@ -429,11 +424,21 @@
 											disabled={scanning}
 											class="mt-8 px-10 py-4 bg-primary text-background font-label font-bold tracking-[0.3em] uppercase hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
 										>
-											<span class="relative z-10">Initiate Tactical Scan</span>
+											<span class="relative z-10">{scanning ? 'Scanning Matrix...' : 'Initiate Tactical Scan'}</span>
 											<div
 												class="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300"
 											></div>
 										</button>
+
+										{#if scanning}
+											<div class="w-64 h-1 bg-white/10 rounded-full mt-4 overflow-hidden relative">
+												<div 
+													class="absolute inset-0 bg-primary shadow-[0_0_10px_#00FFFF]" 
+													style="width: {scanProgress}%"
+												></div>
+											</div>
+											<span class="text-[8px] font-label text-primary/60 tracking-widest mt-2 uppercase">Processing Tactical Data: {scanProgress}%</span>
+										{/if}
 									</div>
 
 									<!-- Target 2: Away -->
@@ -664,6 +669,67 @@
 											class="text-xs font-label font-bold text-secondary mt-2 tracking-widest text-center"
 											>{displayAwayShort}</span
 										>
+									</div>
+								</div>
+
+								<!-- Advanced Tactical Insights -->
+								<div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8" in:fade={{ delay: 600, duration: 600 }}>
+									<!-- Home Tactical Sidebar -->
+									<div class="glass-card p-6 border border-primary/20 bg-primary/5 relative">
+										<div class="absolute -top-3 left-4 px-2 bg-background border border-primary/30 text-[9px] font-label text-primary tracking-[0.2em] font-bold uppercase">
+											Tactical Intel: {selectedFixture?.homeTeam.shortName || 'Home'}
+										</div>
+										<div class="space-y-5">
+											{#each prediction.tacticalBreakdown.homeInsights as insight}
+												<div class="flex items-center gap-4 group">
+													<div class="flex-shrink-0">
+														{#if insight.iconType === 'SUCCESS'}
+															<CheckCircle2 size={16} class="text-primary" />
+														{:else if insight.iconType === 'WARNING'}
+															<AlertTriangle size={16} class="text-secondary animate-pulse" />
+														{:else}
+															<div class="w-2 h-2 rounded-full bg-white/20"></div>
+														{/if}
+													</div>
+													<div class="flex-1">
+														<div class="text-[9px] font-label text-white/40 tracking-widest uppercase mb-0.5">{insight.label}</div>
+														<div class="text-xs font-headline font-bold text-white group-hover:text-primary transition-colors uppercase tracking-wider">{insight.value}</div>
+													</div>
+												</div>
+											{/each}
+											{#if prediction.tacticalBreakdown.homeInsights.length === 0}
+												<div class="text-[10px] font-label text-white/20 italic uppercase tracking-widest">Awaiting further tactical data...</div>
+											{/if}
+										</div>
+									</div>
+
+									<!-- Away Tactical Sidebar -->
+									<div class="glass-card p-6 border border-secondary/20 bg-secondary/5 relative">
+										<div class="absolute -top-3 right-4 px-2 bg-background border border-secondary/30 text-[9px] font-label text-secondary tracking-[0.2em] font-bold uppercase">
+											Tactical Intel: {selectedFixture?.awayTeam.shortName || 'Away'}
+										</div>
+										<div class="space-y-5">
+											{#each prediction.tacticalBreakdown.awayInsights as insight}
+												<div class="flex items-center gap-4 group justify-end text-right">
+													<div class="flex-1">
+														<div class="text-[9px] font-label text-white/40 tracking-widest uppercase mb-0.5">{insight.label}</div>
+														<div class="text-xs font-headline font-bold text-white group-hover:text-secondary transition-colors uppercase tracking-wider">{insight.value}</div>
+													</div>
+													<div class="flex-shrink-0">
+														{#if insight.iconType === 'SUCCESS'}
+															<CheckCircle2 size={16} class="text-secondary" />
+														{:else if insight.iconType === 'WARNING'}
+															<AlertTriangle size={16} class="text-secondary animate-pulse" />
+														{:else}
+															<div class="w-2 h-2 rounded-full bg-white/20"></div>
+														{/if}
+													</div>
+												</div>
+											{/each}
+											{#if prediction.tacticalBreakdown.awayInsights.length === 0}
+												<div class="text-[10px] font-label text-white/20 italic uppercase tracking-widest text-right">Awaiting further tactical data...</div>
+											{/if}
+										</div>
 									</div>
 								</div>
 

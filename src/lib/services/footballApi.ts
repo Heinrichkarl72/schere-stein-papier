@@ -121,6 +121,7 @@ export function parseForm(formStr: string | null): ('W' | 'D' | 'L')[] {
 	return formStr
 		.split(',')
 		.filter((f): f is 'W' | 'D' | 'L' => f === 'W' || f === 'D' || f === 'L')
+		.reverse()
 		.slice(0, 5);
 }
 
@@ -231,7 +232,9 @@ export function standingToTeamData(
 		homePerformance: homePerf,
 		awayPerformance: awayPerf,
 		h2h: {}, // no H2H from standings API — engine uses neutral default
-		squadStrength: 1.0
+		squadStrength: 1.0,
+		goalMargin: standing.goalsFor - standing.goalsAgainst,
+		discipline: null // API free tier doesn't provide easy card stats in standings
 	};
 }
 

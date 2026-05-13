@@ -54,13 +54,13 @@ export const GET: RequestHandler = async ({ url }) => {
 		const awayLineup = matchDetails.awayTeam?.squad?.map((p: any) => p.name) || [];
 
 		const mapHistory = (matches: any[], teamId: number) => {
-			const list = Array.isArray(matches) ? matches : [];
+			const list = Array.isArray(matches) ? [...matches].reverse() : [];
 			return list.map((m: any) => {
 				const isHome = m.homeTeam?.id === teamId;
 				const opponent = isHome ? (m.awayTeam?.shortName || m.awayTeam?.name) : (m.homeTeam?.shortName || m.homeTeam?.name);
 				const score = m.score?.fullTime || { home: 0, away: 0 };
-				const teamGoals = isHome ? score.home : score.away;
-				const opponentGoals = isHome ? score.away : score.home;
+				const teamGoals = isHome ? (score.home ?? 0) : (score.away ?? 0);
+				const opponentGoals = isHome ? (score.away ?? 0) : (score.home ?? 0);
 				
 				let result: 'W' | 'D' | 'L' = 'D';
 				if (teamGoals > opponentGoals) result = 'W';
@@ -77,7 +77,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		// Calculate Extended Form Momentum
 		const calcMomentum = (matches: any[], teamId: number) => {
-			const list = Array.isArray(matches) ? matches : [];
+			const list = Array.isArray(matches) ? [...matches].reverse() : [];
 			if (list.length === 0) return 0;
 			return list.reduce((acc, m, idx) => {
 				const isHome = m.homeTeam?.id === teamId;

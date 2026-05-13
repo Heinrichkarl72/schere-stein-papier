@@ -35,6 +35,10 @@ export interface TeamData {
 
 	// ── Squad ──
 	squadStrength: number; // 0.7 – 1.1 (injuries / star availability)
+	
+	// ── Advanced Intelligence ──
+	goalMargin: number;    // Goal difference of last matches
+	discipline: number | null; // Avg cards per game (if available)
 }
 
 // ── Team Database ──
@@ -60,7 +64,9 @@ const TEAMS: TeamData[] = [
 			'bayern-munich': { wins: 4, draws: 1, losses: 3 },
 			'psg': { wins: 5, draws: 1, losses: 2 },
 		},
-		squadStrength: 1.05,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'barcelona',
@@ -82,7 +88,9 @@ const TEAMS: TeamData[] = [
 			'psg': { wins: 4, draws: 2, losses: 3 },
 			'bayern-munich': { wins: 2, draws: 1, losses: 5 },
 		},
-		squadStrength: 1.08,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'man-city',
@@ -104,7 +112,9 @@ const TEAMS: TeamData[] = [
 			'arsenal': { wins: 5, draws: 2, losses: 3 },
 			'bayern-munich': { wins: 2, draws: 2, losses: 2 },
 		},
-		squadStrength: 1.02,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'liverpool',
@@ -126,7 +136,9 @@ const TEAMS: TeamData[] = [
 			'real-madrid': { wins: 2, draws: 1, losses: 4 },
 			'bayern-munich': { wins: 3, draws: 1, losses: 2 },
 		},
-		squadStrength: 0.98,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'arsenal',
@@ -148,7 +160,9 @@ const TEAMS: TeamData[] = [
 			'bayern-munich': { wins: 1, draws: 2, losses: 3 },
 			'psg': { wins: 2, draws: 1, losses: 2 },
 		},
-		squadStrength: 1.04,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'bayern-munich',
@@ -170,7 +184,9 @@ const TEAMS: TeamData[] = [
 			'man-city': { wins: 2, draws: 2, losses: 2 },
 			'dortmund': { wins: 6, draws: 2, losses: 3 },
 		},
-		squadStrength: 1.00,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'dortmund',
@@ -192,7 +208,9 @@ const TEAMS: TeamData[] = [
 			'real-madrid': { wins: 1, draws: 2, losses: 3 },
 			'inter-milan': { wins: 2, draws: 1, losses: 1 },
 		},
-		squadStrength: 0.92,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'psg',
@@ -214,7 +232,9 @@ const TEAMS: TeamData[] = [
 			'man-city': { wins: 1, draws: 1, losses: 3 },
 			'dortmund': { wins: 2, draws: 1, losses: 2 },
 		},
-		squadStrength: 0.95,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'juventus',
@@ -236,7 +256,9 @@ const TEAMS: TeamData[] = [
 			'real-madrid': { wins: 2, draws: 1, losses: 4 },
 			'barcelona': { wins: 1, draws: 2, losses: 3 },
 		},
-		squadStrength: 0.88,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'inter-milan',
@@ -258,7 +280,9 @@ const TEAMS: TeamData[] = [
 			'man-city': { wins: 1, draws: 1, losses: 3 },
 			'dortmund': { wins: 1, draws: 1, losses: 2 },
 		},
-		squadStrength: 1.02,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'ac-milan',
@@ -280,7 +304,9 @@ const TEAMS: TeamData[] = [
 			'liverpool': { wins: 3, draws: 1, losses: 4 },
 			'real-madrid': { wins: 2, draws: 1, losses: 4 },
 		},
-		squadStrength: 0.90,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 	{
 		id: 'atletico-madrid',
@@ -302,7 +328,9 @@ const TEAMS: TeamData[] = [
 			'liverpool': { wins: 2, draws: 2, losses: 2 },
 			'juventus': { wins: 3, draws: 2, losses: 1 },
 		},
-		squadStrength: 0.97,
+		squadStrength: 1.0,
+		goalMargin: 0,
+		discipline: null,
 	},
 ];
 

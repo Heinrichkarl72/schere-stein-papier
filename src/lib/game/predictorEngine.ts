@@ -5,8 +5,17 @@
 
 import { getTeamById, getH2H, calculateFormMomentum } from '$lib/services/footballData';
 import type { TeamData } from '$lib/services/footballData';
+import { calculateStarPlayerFactor } from '$lib/services/footballApi';
 
 // ── Exported Types ──
+
+export interface TacticalInsight {
+	type: 'STREAK' | 'FIREPOWER' | 'DEFENSE' | 'DISCIPLINE' | 'VENUES';
+	label: string;
+	value: string;
+	intensity: 'LOW' | 'MEDIUM' | 'HIGH';
+	iconType: 'SUCCESS' | 'WARNING' | 'NEUTRAL';
+}
 
 export interface RadarMetrics {
 	attack: number;     // 0–100
@@ -33,6 +42,8 @@ export interface PredictionResult {
 		starPlayerImpact: { home: number; away: number };
 		momentumShift: { home: number; away: number };
 		leagueFactor: number;
+		homeInsights: TacticalInsight[];
+		awayInsights: TacticalInsight[];
 	};
 }
 
@@ -78,6 +89,113 @@ function normalize(value: number, min: number, max: number): number {
  * 7. Poisson score matrix → probabilities
  */
 /**
+ * Generates tactical insights based on team data and context.
+ */
+function generateTacticalInsights(team: TeamData, isHome: boolean, context?: any): TacticalInsight[] {
+	const insights: TacticalInsight[] = [];
+	const form = team.recentForm;
+
+	// 1. Streak Detection (Iterative from most recent)
+	let winStreak = 0;
+	for (const res of form) {
+		if (res === 'W') winStreak++;
+		else break;
+	}
+
+	let unbeatenStreak = 0;
+	for (const res of form) {
+		if (res !== 'L') unbeatenStreak++;
+		else break;
+	}
+
+	if (winStreak >= 2) {
+		insights.push({
+			type: 'STREAK',
+			label: 'UNIT STATUS',
+			value: `${winStreak} CONSECUTIVE VICTORIES`,
+			intensity: winStreak >= 4 ? 'HIGH' : 'MEDIUM',
+			iconType: 'SUCCESS'
+		});
+	} else if (unbeatenStreak >= 3) {
+		insights.push({
+			type: 'STREAK',
+			label: 'UNIT STATUS',
+			value: `UNBEATEN IN ${unbeatenStreak} MATCHES`,
+			intensity: unbeatenStreak >= 5 ? 'HIGH' : 'MEDIUM',
+			iconType: 'SUCCESS'
+		});
+	} else if (form[0] === 'L') {
+		// Losing streak
+		let lossStreak = 0;
+		for (const res of form) {
+			if (res === 'L') lossStreak++;
+			else break;
+		}
+		if (lossStreak >= 2) {
+			insights.push({
+				type: 'STREAK',
+				label: 'CRITICAL STATUS',
+				value: `${lossStreak} CONSECUTIVE LOSSES`,
+				intensity: 'HIGH',
+				iconType: 'WARNING'
+			});
+		}
+	}
+
+	// 2. Scoring Threat (Firepower / Momentum)
+	const starPlayers = isHome ? context?.homeStarPlayers : context?.awayStarPlayers;
+	if (starPlayers && starPlayers.length > 0) {
+		const topScorer = starPlayers[0];
+		insights.push({
+			type: 'FIREPOWER',
+			label: 'ELITE STRIKER',
+			value: `${topScorer.name.toUpperCase()} ACTIVE (${topScorer.goals} GOALS)`,
+			intensity: 'HIGH',
+			iconType: 'SUCCESS'
+		});
+	} else {
+		// Fallback to Team Momentum / Goal Margin
+		const margin = team.goalMargin;
+		insights.push({
+			type: 'FIREPOWER',
+			label: 'TEAM MOMENTUM',
+			value: `NET MARGIN: ${margin > 0 ? '+' : ''}${margin} GOALS`,
+			intensity: margin > 5 ? 'HIGH' : 'MEDIUM',
+			iconType: margin > 0 ? 'SUCCESS' : 'NEUTRAL'
+		});
+	}
+
+	// 3. Defensive Profile / Discipline
+	if (team.discipline !== null) {
+		insights.push({
+			type: 'DISCIPLINE',
+			label: 'OPERATIONAL CONDUCT',
+			value: `AVG ${team.discipline.toFixed(1)} CARDS/OP`,
+			intensity: team.discipline > 3 ? 'HIGH' : 'LOW',
+			iconType: team.discipline > 3 ? 'WARNING' : 'SUCCESS'
+		});
+	} else if (team.defensiveStrength > 1.25) {
+		insights.push({
+			type: 'DEFENSE',
+			label: 'FORTRESS',
+			value: 'ELITE ARMOR INTEGRITY',
+			intensity: 'HIGH',
+			iconType: 'SUCCESS'
+		});
+	} else {
+		insights.push({
+			type: 'DISCIPLINE',
+			label: 'DISCIPLINE',
+			value: 'DATA N/A',
+			intensity: 'LOW',
+			iconType: 'NEUTRAL'
+		});
+	}
+
+	return insights.slice(0, 3);
+}
+
+/**
  * Calculate from live TeamData objects (bypasses simulated DB lookup).
  */
 export function calculateProbabilityFromData(
@@ -94,7 +212,6 @@ export function calculateProbabilityFromData(
 	let awayStarFactor = 1.0;
 
 	if (context?.homeLineup && context.homeStarPlayers) {
-		const { calculateStarPlayerFactor } = require('../services/footballApi');
 		homeStarFactor = calculateStarPlayerFactor(context.homeStarPlayers, context.homeLineup);
 		awayStarFactor = calculateStarPlayerFactor(context.awayStarPlayers, context.awayLineup);
 	}
@@ -136,7 +253,9 @@ export function calculateProbabilityFromData(
 				home: context?.homeMomentum || 0,
 				away: context?.awayMomentum || 0
 			},
-			leagueFactor: leagueGoalMultiplier
+			leagueFactor: leagueGoalMultiplier,
+			homeInsights: generateTacticalInsights(home, true, context),
+			awayInsights: generateTacticalInsights(away, false, context)
 		}
 	};
 }
@@ -299,7 +418,9 @@ function runPoissonModel(
 		tacticalBreakdown: {
 			starPlayerImpact: { home: 0, away: 0 },
 			momentumShift: { home: 0, away: 0 },
-			leagueFactor: 1.0
+			leagueFactor: 1.0,
+			homeInsights: [],
+			awayInsights: []
 		}
 	};
 }
