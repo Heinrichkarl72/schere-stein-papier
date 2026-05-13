@@ -9,8 +9,8 @@ import type { ApiMatch, ApiStandingsEntry, ApiScorer, StarPlayer } from '$lib/se
 import { mapMatch, mapStandingsEntry } from '$lib/services/footballApi';
 import type { LiveFixture, TeamStanding } from '$lib/services/footballApi';
 
-// Prevent prerendering — this page needs live server data
-export const prerender = false;
+// Enable prerendering — this page will be built with data from the last CI/CD run
+export const prerender = true;
 
 const BASE_URL = 'https://api.football-data.org/v4';
 const COMPETITIONS = ['PL', 'BL1', 'PD', 'SA', 'FL1', 'WC'] as const;

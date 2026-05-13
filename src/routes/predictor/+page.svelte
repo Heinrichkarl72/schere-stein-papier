@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { base } from '$app/paths';
 	import { operativeStore } from '$lib/stores/operative.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
@@ -104,13 +105,18 @@
 		tacticalContext = null;
 
 		// Start background fetch immediately (silent)
-		fetch(`/api/tactical-data?matchId=${fixture.id}&homeId=${fixture.homeTeam.id}&awayId=${fixture.awayTeam.id}`)
-			.then(res => res.json())
+		fetch(`${base}/api/tactical-data?matchId=${fixture.id}&homeId=${fixture.homeTeam.id}&awayId=${fixture.awayTeam.id}`)
+			.then(async res => {
+				if (!res.ok) throw new Error('API Offline');
+				const contentType = res.headers.get('content-type');
+				if (!contentType || !contentType.includes('application/json')) throw new Error('Not JSON');
+				return res.json();
+			})
 			.then(data => {
 				tacticalContext = data;
 			})
 			.catch(err => {
-				console.error('Initial Tactical Fetch Failed:', err);
+				console.warn('Tactical Link Unavailable (Expected in Static Build):', err);
 			});
 	}
 

@@ -1,11 +1,12 @@
 {
 	"name": "schere-stein-papier",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "vite build && node scripts/post-build.js",
+		"deploy": "pnpm run build && gh-pages -d build -t true",
 		"preview": "vite preview",
 		"prepare": "playwright install && svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -32,6 +33,7 @@
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.17.0",
+		"gh-pages": "^6.3.0",
 		"globals": "^17.4.0",
 		"playwright": "^1.59.1",
 		"prettier": "^3.8.1",
