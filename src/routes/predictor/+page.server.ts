@@ -34,7 +34,7 @@ async function fetchWithCache<T>(path: string, apiKey: string): Promise<T> {
 		if (res.status === 429) {
 			// If rate limited, return stale data if available
 			if (cache[path]) return cache[path].data as T;
-			throw new Error('API Rate limit reached. Retrying in 60s…');
+			throw new Error('OPERATIONAL LIMIT REACHED. PLEASE WAIT 60 SECONDS.');
 		}
 		const body = await res.text().catch(() => '');
 		throw new Error(`Football API ${res.status}: ${res.statusText} — ${body}`);

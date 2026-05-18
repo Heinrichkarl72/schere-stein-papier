@@ -6,6 +6,7 @@
 import { getTeamById, getH2H, calculateFormMomentum } from '$lib/services/footballData';
 import type { TeamData } from '$lib/services/footballData';
 import { calculateStarPlayerFactor } from '$lib/services/footballApi';
+import type { TacticalContext } from '$lib/services/footballApi';
 
 // ── Exported Types ──
 
@@ -201,7 +202,7 @@ function generateTacticalInsights(team: TeamData, isHome: boolean, context?: any
 export function calculateProbabilityFromData(
 	home: TeamData,
 	away: TeamData,
-	context?: import('../services/footballApi').TacticalContext & { 
+	context?: TacticalContext & { 
 		homeMomentum?: number; 
 		awayMomentum?: number;
 		leagueCode?: string;
