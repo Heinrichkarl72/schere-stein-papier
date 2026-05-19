@@ -7,7 +7,7 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import StatsSidebar from '$lib/components/StatsSidebar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import OperativeAuth from '$lib/components/OperativeAuth.svelte';
+
 	import { Target, Zap, ShieldAlert, Activity, Crosshair, Radio, CheckCircle2, AlertTriangle } from 'lucide-svelte';
 
 	import { getAllTeams } from '$lib/services/footballData';
@@ -309,9 +309,7 @@
 	/>
 </svelte:head>
 
-{#if !operativeStore.isLoggedIn}
-	<OperativeAuth />
-{:else}
+
 	<div class="flex flex-col h-screen bg-surface selection:bg-primary/20 selection:text-white">
 		<Header />
 
@@ -1157,7 +1155,6 @@
 
 		<Footer />
 	</div>
-{/if}
 
 <style>
 	/* ── Scanning Animation ── */

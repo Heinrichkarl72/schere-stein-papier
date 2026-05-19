@@ -4,7 +4,7 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import StatsSidebar from '$lib/components/StatsSidebar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import OperativeAuth from '$lib/components/OperativeAuth.svelte';
+
 	import { 
 		User, Shield, Zap, Award, Star, Crosshair, 
 		Ghost, Eye, Binary, Cpu, Fingerprint, Lock,
@@ -80,9 +80,7 @@
 	<title>ARENA.OPS | RECRUITS</title>
 </svelte:head>
 
-{#if !operativeStore.isLoggedIn}
-	<OperativeAuth />
-{:else}
+
 	<div class="flex flex-col h-screen bg-surface selection:bg-primary/20 selection:text-white">
 		<Header />
 
@@ -264,7 +262,7 @@
 
 		<Footer />
 	</div>
-{/if}
+
 
 <style>
 	@keyframes scan {

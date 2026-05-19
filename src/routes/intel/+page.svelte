@@ -8,7 +8,7 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import StatsSidebar from '$lib/components/StatsSidebar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import OperativeAuth from '$lib/components/OperativeAuth.svelte';
+
 	import { Activity, Shield, Target, Clock, ChevronRight } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 
@@ -62,9 +62,7 @@
 	<title>ARENA.OPS | INTEL</title>
 </svelte:head>
 
-{#if !operativeStore.isLoggedIn}
-	<OperativeAuth />
-{:else}
+
 	<div class="flex flex-col h-screen bg-surface selection:bg-primary/20 selection:text-white">
 		<Header />
 
@@ -276,7 +274,7 @@
 
 		<Footer />
 	</div>
-{/if}
+
 
 <style>
 	:global(.glass-card) {

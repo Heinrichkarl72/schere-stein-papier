@@ -8,7 +8,7 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import StatsSidebar from '$lib/components/StatsSidebar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import OperativeAuth from '$lib/components/OperativeAuth.svelte';
+
 	import { Sword, Box, Shield, Zap, Target, Cpu, LayoutGrid, Check, Settings, Activity } from 'lucide-svelte';
 	import { fade, fly, scale } from 'svelte/transition';
 
@@ -92,9 +92,7 @@
 	<title>ARENA.OPS | ARSENAL</title>
 </svelte:head>
 
-{#if !operativeStore.isLoggedIn}
-	<OperativeAuth />
-{:else}
+
 	<div class="flex flex-col h-screen bg-surface selection:bg-primary/20 selection:text-white">
 		<Header />
 
@@ -272,7 +270,7 @@
 
 		<Footer />
 	</div>
-{/if}
+
 
 <style>
 	/* Skin Styles */

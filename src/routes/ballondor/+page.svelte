@@ -5,7 +5,7 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { operativeStore } from '$lib/stores/operative.svelte';
-	import OperativeAuth from '$lib/components/OperativeAuth.svelte';
+
 
 	interface Player {
 		rank: number;
@@ -135,9 +135,7 @@
 	<title>ARENA.OPS | BALLON D'OR INTEL</title>
 </svelte:head>
 
-{#if !operativeStore.isLoggedIn}
-	<OperativeAuth />
-{:else}
+
 	<div class="flex flex-col h-screen bg-surface selection:bg-primary/20 selection:text-white">
 		<Header />
 
@@ -325,7 +323,7 @@
 			</section>
 		</main>
 	</div>
-{/if}
+
 
 <style>
 	/* Custom styles for the tracking effect */
